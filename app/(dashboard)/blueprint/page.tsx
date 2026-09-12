@@ -26,8 +26,10 @@ import Link from 'next/link';
 function BlueprintContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const competitorUrl = searchParams.get('competitorUrl') || 'https://instagram.com/glowrecipe';
-  const competitorHandle = searchParams.get('handle') || 'inspiration';
+  const rawUrl = searchParams.get('competitorUrl');
+  const rawHandle = searchParams.get('handle');
+  const competitorUrl = rawUrl || 'https://www.youtube.com/@comicverseog';
+  const competitorHandle = rawHandle || (rawUrl ? rawUrl.split('/').pop()?.replace('@', '') : 'comicverseog') || 'creator';
   const limitParam = parseInt(searchParams.get('limit') || '12', 10) || 12;
 
   // Brand Inputs State

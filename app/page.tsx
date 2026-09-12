@@ -407,7 +407,7 @@ export default function LaunchpadPage() {
           <div className="flex flex-wrap items-center gap-2 pt-3 mt-2 border-t border-white/5 text-xs">
             <span className="text-zinc-500 font-mono text-[11px]">TRY COMPETITOR:</span>
             {[
-              { label: '@glowrecipe (D2C Skincare)', target: 'https://instagram.com/glowrecipe' },
+              { label: '@comicverseog (Entertainment)', target: 'https://www.youtube.com/@comicverseog' },
               { label: '@gymshark (Fitness)', target: 'https://instagram.com/gymshark' },
               { label: '@notionhq (SaaS)', target: 'https://instagram.com/notionhq' },
               { label: '@zomato (Food/Viral)', target: 'https://instagram.com/zomato' },

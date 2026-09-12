@@ -72,16 +72,16 @@ function formatCount(num: number | undefined): string {
 function inferNicheFromText(text: string, handle: string) {
   const lower = (text + ' ' + handle).toLowerCase();
   
-  if (lower.includes('comic') || lower.includes('marvel') || lower.includes('dc') || lower.includes('spider') || lower.includes('movie') || lower.includes('batman') || lower.includes('avengers') || lower.includes('trailer') || lower.includes('anime')) {
+  if (lower.includes('comic') || lower.includes('marvel') || lower.includes('dc') || lower.includes('spider') || lower.includes('movie') || lower.includes('batman') || lower.includes('avengers') || lower.includes('trailer') || lower.includes('anime') || lower.includes('film') || lower.includes('cinema')) {
     return {
-      industry: 'Pop Culture, Cinema & Comic Lore Analysis',
-      audience: 'Entertainment enthusiasts, movie buffs & comic lore fans',
+      industry: 'Pop Culture, Cinema & Entertainment Lore',
+      audience: 'Entertainment enthusiasts, movie buffs & pop culture fans',
       valueProp: 'Unfiltered deep-dive cinematic breakdowns & hidden lore revelations',
       product: 'Flagship Breakdown Series & Exclusive Member Lore Hub'
     };
   }
 
-  if (lower.includes('code') || lower.includes('tech') || lower.includes('ai') || lower.includes('software') || lower.includes('dev') || lower.includes('python') || lower.includes('react')) {
+  if (lower.includes('code') || lower.includes('tech') || lower.includes('ai') || lower.includes('software') || lower.includes('dev') || lower.includes('python') || lower.includes('react') || lower.includes('gadget') || lower.includes('phone') || lower.includes('apple')) {
     return {
       industry: 'Software Engineering, AI & Tech Systems',
       audience: 'Developers, tech founders & engineering leaders',
@@ -90,7 +90,7 @@ function inferNicheFromText(text: string, handle: string) {
     };
   }
 
-  if (lower.includes('fit') || lower.includes('gym') || lower.includes('workout') || lower.includes('muscle') || lower.includes('diet') || lower.includes('protein')) {
+  if (lower.includes('fit') || lower.includes('gym') || lower.includes('workout') || lower.includes('muscle') || lower.includes('diet') || lower.includes('protein') || lower.includes('health')) {
     return {
       industry: 'Fitness, High Performance & Nutrition',
       audience: 'Fitness enthusiasts & athletes striving for optimal human performance',
@@ -99,20 +99,38 @@ function inferNicheFromText(text: string, handle: string) {
     };
   }
 
-  if (lower.includes('skin') || lower.includes('beauty') || lower.includes('glow') || lower.includes('makeup')) {
+  if (lower.includes('game') || lower.includes('gaming') || lower.includes('playstation') || lower.includes('xbox') || lower.includes('gta') || lower.includes('stream') || lower.includes('esports')) {
     return {
-      industry: 'Clean D2C Beauty & Skincare',
-      audience: 'Skincare enthusiasts seeking clinical barrier repair',
-      valueProp: '100% bio-compatible hydration formulated by dermatologists',
-      product: 'Ceramide Barrier Recovery Serum'
+      industry: 'Gaming, Esports & Interactive Media',
+      audience: 'Gamers, live stream viewers & esports community',
+      valueProp: 'High-energy gameplay breakdowns & meta strategy deep dives',
+      product: 'VIP Gaming Guild & Exclusive Strategy Guides'
+    };
+  }
+
+  if (lower.includes('money') || lower.includes('crypto') || lower.includes('finance') || lower.includes('stock') || lower.includes('invest') || lower.includes('business') || lower.includes('startup') || lower.includes('founder')) {
+    return {
+      industry: 'Finance, Business & Wealth Strategy',
+      audience: 'Investors, entrepreneurs & ambitious professionals',
+      valueProp: 'Actionable financial intelligence & market growth breakdowns',
+      product: 'Wealth Mastermind & Business Growth Frameworks'
+    };
+  }
+
+  if (lower.includes('skin') || lower.includes('beauty') || lower.includes('makeup') || lower.includes('cosmetics')) {
+    return {
+      industry: 'D2C Skincare & Beauty',
+      audience: 'Skincare enthusiasts seeking clinical barrier repair & glowing skin',
+      valueProp: 'Bio-compatible formulations backed by clinical research',
+      product: 'Flagship Barrier Repair Serum'
     };
   }
 
   return {
-    industry: 'Digital Content & Brand Growth Engine',
-    audience: 'Engaged consumers & niche enthusiasts',
+    industry: 'Digital Content & Creator Growth Engine',
+    audience: 'Engaged subscribers, followers & niche target audience',
     valueProp: 'High-retention visual storytelling & authority positioning',
-    product: 'Flagship Product & Content Ecosystem'
+    product: 'Flagship Content Series & Creator Offer Ecosystem'
   };
 }
 
@@ -132,19 +150,21 @@ export function generateGrowthBlueprint(
   const allTitlesText = validPosts.map(p => p.title || p.caption || '').join(' ');
   const detectedNiche = inferNicheFromText(allTitlesText, competitorHandle);
 
-  // If brand is default placeholder ("Aura Skincare" / empty), auto-tune to competitor niche!
-  const isDefaultSkincare = brand?.brandName === 'Aura Skincare' || !brand?.brandName;
-  
+  // Determine clean handle and brand identity
   const cleanHandle = competitorHandle.replace(/^@/, '');
-  const brandName = isDefaultSkincare
-    ? `${cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1)} Studio`
+  const formattedHandleName = cleanHandle ? cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1) : 'Creator';
+  
+  const isDefaultBrand = !brand?.brandName || brand.brandName === 'Aura Skincare' || brand.brandName === 'Your Brand Name' || brand.brandName.trim() === '';
+
+  const brandName = isDefaultBrand
+    ? formattedHandleName
     : brand.brandName.trim();
 
-  const industry = isDefaultSkincare ? detectedNiche.industry : (brand.industry || detectedNiche.industry).trim();
-  const audience = isDefaultSkincare ? detectedNiche.audience : (brand.targetAudience || detectedNiche.audience).trim();
-  const valueProp = isDefaultSkincare ? detectedNiche.valueProp : (brand.valueProposition || detectedNiche.valueProp).trim();
+  const industry = isDefaultBrand || !brand?.industry?.trim() ? detectedNiche.industry : brand.industry.trim();
+  const audience = isDefaultBrand || !brand?.targetAudience?.trim() ? detectedNiche.audience : brand.targetAudience.trim();
+  const valueProp = isDefaultBrand || !brand?.valueProposition?.trim() ? detectedNiche.valueProp : brand.valueProposition.trim();
   const tone = (brand?.toneOfVoice || 'Authoritative, fast-paced, and analytical').trim();
-  const product = isDefaultSkincare ? detectedNiche.product : (brand.primaryProduct || detectedNiche.product).trim();
+  const product = isDefaultBrand || !brand?.primaryProduct?.trim() ? detectedNiche.product : brand.primaryProduct.trim();
 
   // Compute total observed views and average ER
   const totalViews = validPosts.reduce((acc, p) => acc + (p.metrics?.views?.value || 0), 0);
