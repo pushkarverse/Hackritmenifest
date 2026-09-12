@@ -41,6 +41,8 @@ function IntelligenceContent() {
   const [sortKey, setSortKey] = useState<SortKey>('index');
   const [filterAI, setFilterAI] = useState<'all' | 'live' | 'ai'>('all');
 
+  const platformParam = searchParams.get('platform') || (targetUrl.toLowerCase().includes('youtube') || targetUrl.toLowerCase().includes('verse') || targetUrl.toLowerCase().includes('comic') || targetUrl.toLowerCase().includes('og') ? 'youtube' : undefined);
+
   const fetchAnalysis = async (limitToFetch: number) => {
     setIsLoading(true);
     setError('');
@@ -48,7 +50,7 @@ function IntelligenceContent() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: targetUrl, limit: limitToFetch })
+        body: JSON.stringify({ url: targetUrl, platform: platformParam, limit: limitToFetch })
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || 'Failed to analyze');

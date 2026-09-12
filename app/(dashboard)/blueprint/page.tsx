@@ -42,6 +42,7 @@ function BlueprintContent() {
 
   const [blueprint, setBlueprint] = useState<GrowthBlueprint | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUserEdited, setIsUserEdited] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'hooks' | 'calendar' | 'ads' | 'pillars'>('hooks');
 
@@ -61,6 +62,9 @@ function BlueprintContent() {
       const data = await res.json();
       if (data.success && data.blueprint) {
         setBlueprint(data.blueprint);
+        if (data.blueprint.brandInput && !isUserEdited) {
+          setBrandInput(data.blueprint.brandInput);
+        }
       }
     } catch (err) {
       console.error('Failed to generate blueprint:', err);
@@ -124,7 +128,7 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.brandName}
-              onChange={(e) => setBrandInput({ ...brandInput, brandName: e.target.value })}
+              onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, brandName: e.target.value }); }}
               className="input-velvet !py-2 !text-xs"
             />
           </div>
@@ -134,7 +138,7 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.industry}
-              onChange={(e) => setBrandInput({ ...brandInput, industry: e.target.value })}
+              onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, industry: e.target.value }); }}
               className="input-velvet !py-2 !text-xs"
             />
           </div>
@@ -144,7 +148,7 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.primaryProduct}
-              onChange={(e) => setBrandInput({ ...brandInput, primaryProduct: e.target.value })}
+              onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, primaryProduct: e.target.value }); }}
               className="input-velvet !py-2 !text-xs"
             />
           </div>
@@ -154,7 +158,7 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.targetAudience}
-              onChange={(e) => setBrandInput({ ...brandInput, targetAudience: e.target.value })}
+              onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, targetAudience: e.target.value }); }}
               className="input-velvet !py-2 !text-xs"
             />
           </div>
@@ -164,7 +168,7 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.valueProposition}
-              onChange={(e) => setBrandInput({ ...brandInput, valueProposition: e.target.value })}
+              onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, valueProposition: e.target.value }); }}
               className="input-velvet !py-2 !text-xs"
             />
           </div>
@@ -174,7 +178,7 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.toneOfVoice}
-              onChange={(e) => setBrandInput({ ...brandInput, toneOfVoice: e.target.value })}
+              onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, toneOfVoice: e.target.value }); }}
               className="input-velvet !py-2 !text-xs"
             />
           </div>

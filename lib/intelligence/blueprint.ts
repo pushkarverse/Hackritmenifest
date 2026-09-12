@@ -62,35 +62,266 @@ export interface GrowthBlueprint {
   guardrailsAndAntiPatterns: string[];
 }
 
+function formatCount(num: number | undefined): string {
+  if (!num || isNaN(num)) return '0';
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
+  return num.toLocaleString();
+}
+
+function inferNicheFromText(text: string, handle: string) {
+  const lower = (text + ' ' + handle).toLowerCase();
+  
+  if (lower.includes('comic') || lower.includes('marvel') || lower.includes('dc') || lower.includes('spider') || lower.includes('movie') || lower.includes('batman') || lower.includes('avengers') || lower.includes('trailer') || lower.includes('anime')) {
+    return {
+      industry: 'Pop Culture, Cinema & Comic Lore Analysis',
+      audience: 'Entertainment enthusiasts, movie buffs & comic lore fans',
+      valueProp: 'Unfiltered deep-dive cinematic breakdowns & hidden lore revelations',
+      product: 'Flagship Breakdown Series & Exclusive Member Lore Hub'
+    };
+  }
+
+  if (lower.includes('code') || lower.includes('tech') || lower.includes('ai') || lower.includes('software') || lower.includes('dev') || lower.includes('python') || lower.includes('react')) {
+    return {
+      industry: 'Software Engineering, AI & Tech Systems',
+      audience: 'Developers, tech founders & engineering leaders',
+      valueProp: 'Production-grade architectural breakdowns & AI workflow blueprints',
+      product: 'Engineering Masterclass & Developer OS Tools'
+    };
+  }
+
+  if (lower.includes('fit') || lower.includes('gym') || lower.includes('workout') || lower.includes('muscle') || lower.includes('diet') || lower.includes('protein')) {
+    return {
+      industry: 'Fitness, High Performance & Nutrition',
+      audience: 'Fitness enthusiasts & athletes striving for optimal human performance',
+      valueProp: 'Science-backed workout protocols & evidence-based physical optimization',
+      product: 'Peak Performance Training Program & Custom Meal Protocols'
+    };
+  }
+
+  if (lower.includes('skin') || lower.includes('beauty') || lower.includes('glow') || lower.includes('makeup')) {
+    return {
+      industry: 'Clean D2C Beauty & Skincare',
+      audience: 'Skincare enthusiasts seeking clinical barrier repair',
+      valueProp: '100% bio-compatible hydration formulated by dermatologists',
+      product: 'Ceramide Barrier Recovery Serum'
+    };
+  }
+
+  return {
+    industry: 'Digital Content & Brand Growth Engine',
+    audience: 'Engaged consumers & niche enthusiasts',
+    valueProp: 'High-retention visual storytelling & authority positioning',
+    product: 'Flagship Product & Content Ecosystem'
+  };
+}
+
 export function generateGrowthBlueprint(
   competitorPosts: ExtractedPost[],
   brand: UserBrandInput,
   competitorHandle: string = 'inspiration'
 ): GrowthBlueprint {
-  const brandName = (brand.brandName || 'Your Brand').trim();
-  const industry = (brand.industry || 'Direct to Consumer').trim();
-  const audience = (brand.targetAudience || 'Ambitious consumers').trim();
-  const valueProp = (brand.valueProposition || 'High-performance quality').trim();
-  const tone = (brand.toneOfVoice || 'Authoritative and transparent').trim();
-  const product = (brand.primaryProduct || 'Flagship Product').trim();
+  const validPosts = (competitorPosts || []).filter(p => p && (p.title || p.caption));
+  const sortedByViews = [...validPosts].sort((a, b) => (b.metrics?.views?.value || 0) - (a.metrics?.views?.value || 0));
+  
+  const topPost = sortedByViews[0] || validPosts[0];
+  const secondPost = sortedByViews[1] || validPosts[1] || topPost;
+  const thirdPost = sortedByViews[2] || validPosts[2] || topPost;
 
-  // Extract real topics & hook mechanics from the competitor's observed posts
-  const observedHooks = competitorPosts.map(p => p.hookText || p.title).filter(Boolean);
-  const observedFormats = competitorPosts.map(p => p.format).filter(Boolean);
-  const topCompetitorHook = observedHooks[0] || 'Problem-First Agitation';
-  const secondCompetitorHook = observedHooks[1] || 'Behind the Scenes Reveal';
-  const thirdCompetitorHook = observedHooks[2] || 'Side-by-Side Comparison';
-  const topFormat = observedFormats[0] || 'Founder POV Reel (25-35s)';
+  // Infer domain/niche from observed post titles & handle
+  const allTitlesText = validPosts.map(p => p.title || p.caption || '').join(' ');
+  const detectedNiche = inferNicheFromText(allTitlesText, competitorHandle);
 
-  // Calculate real average competitor engagement safely
-  const avgCompetitorER = competitorPosts.length
-    ? (competitorPosts.reduce((acc, p) => acc + (p.metrics?.engagementRate?.value || 4.2), 0) / competitorPosts.length).toFixed(1)
+  // If brand is default placeholder ("Aura Skincare" / empty), auto-tune to competitor niche!
+  const isDefaultSkincare = brand?.brandName === 'Aura Skincare' || !brand?.brandName;
+  
+  const cleanHandle = competitorHandle.replace(/^@/, '');
+  const brandName = isDefaultSkincare
+    ? `${cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1)} Studio`
+    : brand.brandName.trim();
+
+  const industry = isDefaultSkincare ? detectedNiche.industry : (brand.industry || detectedNiche.industry).trim();
+  const audience = isDefaultSkincare ? detectedNiche.audience : (brand.targetAudience || detectedNiche.audience).trim();
+  const valueProp = isDefaultSkincare ? detectedNiche.valueProp : (brand.valueProposition || detectedNiche.valueProp).trim();
+  const tone = (brand?.toneOfVoice || 'Authoritative, fast-paced, and analytical').trim();
+  const product = isDefaultSkincare ? detectedNiche.product : (brand.primaryProduct || detectedNiche.product).trim();
+
+  // Compute total observed views and average ER
+  const totalViews = validPosts.reduce((acc, p) => acc + (p.metrics?.views?.value || 0), 0);
+  const totalViewsFormatted = formatCount(totalViews);
+  const avgER = validPosts.length
+    ? (validPosts.reduce((acc, p) => acc + (p.metrics?.engagementRate?.value || 4.2), 0) / validPosts.length).toFixed(1)
     : '4.8';
+
+  // Executive Diagnosis grounded in real posts
+  const executiveDiagnosis = {
+    competitorWinningEdge: topPost
+      ? `@${cleanHandle} achieves massive virality (${formatCount(topPost.metrics?.views?.value)} views on top upload "${topPost.title}") with an average ${avgER}% engagement rate across ${validPosts.length} observed uploads.`
+      : `@${cleanHandle} demonstrates strong audience retention with an average ${avgER}% engagement rate.`,
+    brandOpportunityGap: topPost
+      ? `While @${cleanHandle} dominates broad interest around topics like "${topPost.title.slice(0, 55)}", ${brandName} can capture high-converting intent by launching ${product} tailored to ${audience}.`
+      : `While @${cleanHandle} captures top-of-funnel reach in ${industry}, ${brandName} can capture market share with ${valueProp}.`,
+    strategicVerdict: `Deploy a 7-day organic sprint utilizing ${brandName}'s tone ("${tone}") while taking visual interrupt frameworks directly proven by @${cleanHandle}'s top uploads.`
+  };
+
+  // Build originalHooks grounded in the top 5 REAL posts
+  const sourcePosts = sortedByViews.length > 0 ? sortedByViews : validPosts;
+  const originalHooks: BlueprintHook[] = sourcePosts.slice(0, 5).map((post, idx) => {
+    const postViews = post.metrics?.views?.value ? formatCount(post.metrics.views.value) + ' Views' : 'Observed Upload';
+    const postLikes = post.metrics?.likes?.value ? formatCount(post.metrics.likes.value) + ' Likes' : '';
+    const cleanTitle = post.title || post.caption?.slice(0, 50) || `Observed Upload #${idx + 1}`;
+    
+    return {
+      id: `hook_${idx + 1}`,
+      title: `The "${cleanTitle.slice(0, 40)}" Hook Angle`,
+      hookHeadline: `"The critical detail about ${cleanTitle.slice(0, 50)} that 90% of people completely missed."`,
+      visualCue: `Frame 1 pattern interrupt: 400ms zoom overlay with high-contrast text highlighting '${cleanTitle.slice(0, 30)}'.`,
+      underlyingPsychology: `Curiosity & High-Intent Agitation: Leans into the viral hook mechanics that drove ${postViews} on @${cleanHandle}.`,
+      scriptOutline: `1. 0-3s Verbal Hook: State the contrarian premise about ${cleanTitle.slice(0, 35)}.\n2. 3-12s Evidence & Breakdown: Reveal key insight or proof point.\n3. 12-25s Value Bridge: Connect to how ${brandName}'s ${product} delivers ${valueProp}.\n4. 25-30s CTA: Direct viewers to save & follow for part 2.`,
+      suggestedFormat: post.format || 'Short Video / Reel (25-35s)',
+      callToAction: `Comment "${brandName.toUpperCase()}" for the complete deep-dive breakdown.`,
+      estimatedWinRate: `${Math.min(98, 88 + idx * 2)}% Algorithmic Win Rate (${postViews})`,
+      inspiredByCompetitorPost: `"${cleanTitle}" — ${postViews} ${postLikes ? '(' + postLikes + ')' : ''}`
+    };
+  });
+
+  // Fill up to 5 if fewer than 5 posts
+  while (originalHooks.length < 5) {
+    const idx = originalHooks.length;
+    originalHooks.push({
+      id: `hook_${idx + 1}`,
+      title: `The ${industry} High-Intent Breakdown`,
+      hookHeadline: `"Stop making this critical error when dealing with ${industry.toLowerCase()}."`,
+      visualCue: `Direct camera eye-contact with bold yellow on-screen captions.`,
+      underlyingPsychology: `Pain Agitation & Authority Positioning.`,
+      scriptOutline: `1. Call out common mistake.\n2. Show fast visual proof of solution.\n3. Present ${brandName}'s ${product}.`,
+      suggestedFormat: 'POV Reel (25s)',
+      callToAction: `Save this before your next purchase.`,
+      estimatedWinRate: `88% Win Rate`,
+      inspiredByCompetitorPost: `@${cleanHandle} Top Framework`
+    });
+  }
+
+  // Build 7-Day Organic Calendar grounded in actual post topics & formats
+  const sevenDayCalendar: CalendarDayPlan[] = [
+    {
+      day: 'Monday',
+      theme: topPost ? `Breakout Topic: ${topPost.title.slice(0, 40)}` : `Industry Teardown`,
+      format: topPost?.format || 'Talking Head Reel (28s)',
+      hookHeadline: topPost ? `The secret behind ${topPost.title.slice(0, 45)}` : `The #1 mistake in ${industry}`,
+      productionNotes: `High-energy opening frame. Jump cuts every 2.5s. Yellow captions.`,
+      targetMetric: 'Reach / Top of Funnel'
+    },
+    {
+      day: 'Tuesday',
+      theme: secondPost ? `Deep-Dive Analysis: ${secondPost.title.slice(0, 40)}` : `Product Demonstration`,
+      format: secondPost?.format || 'Macro Visual Reel (18s)',
+      hookHeadline: secondPost ? `Why nobody is talking about ${secondPost.title.slice(0, 45)}` : `Listen to this before buying`,
+      productionNotes: `Crisp audio focus, clear visual demonstration of ${product}.`,
+      targetMetric: 'Saves / High Intent'
+    },
+    {
+      day: 'Wednesday',
+      theme: thirdPost ? `Contrarian Breakdown: ${thirdPost.title.slice(0, 40)}` : `Radical Transparency`,
+      format: thirdPost?.format || 'Behind the Scenes Vlog (35s)',
+      hookHeadline: thirdPost ? `The unexpected truth about ${thirdPost.title.slice(0, 45)}` : `Why we built ${brandName}`,
+      productionNotes: `Show raw production data, notes, or analytical proof.`,
+      targetMetric: 'Saves / High Intent'
+    },
+    {
+      day: 'Thursday',
+      theme: `Side-by-Side Comparison & Value Proof`,
+      format: 'Split-Screen Case Study (25s)',
+      hookHeadline: `Standard ${industry} solutions vs ${brandName} ${product}`,
+      productionNotes: `High-contrast comparative visuals demonstrating ${valueProp}.`,
+      targetMetric: 'Conversions'
+    },
+    {
+      day: 'Friday',
+      theme: `Direct Community AMA & Review Crusher`,
+      format: 'Founder Uncut Response (45s)',
+      hookHeadline: `Answering the top question about ${product} from our community`,
+      productionNotes: `Conversational tone matching ${tone}. Seated, direct framing.`,
+      targetMetric: 'Comments / Community'
+    },
+    {
+      day: 'Saturday',
+      theme: `User Case Study & Transformation Timeline`,
+      format: 'Story-Driven Reel (30s)',
+      hookHeadline: `What happened after using ${brandName} ${product}`,
+      productionNotes: `Fast-paced proof narrative with real user milestones.`,
+      targetMetric: 'Conversions'
+    },
+    {
+      day: 'Sunday',
+      theme: `Weekly Vision & Industry Synthesis`,
+      format: 'Carousel / Narrative Voiceover (20s)',
+      hookHeadline: `Why ${brandName} is changing the standard in ${industry}`,
+      productionNotes: `Weekend reflection anchoring brand mission and core values.`,
+      targetMetric: 'Reach / Top of Funnel'
+    }
+  ];
+
+  // Content Pillars
+  const contentPillars = [
+    {
+      title: `${product} Performance & Breakdown`,
+      description: `Deconstruct why ${brandName}'s ${product} delivers ${valueProp} in ${industry}.`,
+      weightPercentage: 35,
+      recommendedFrequency: '3x / week'
+    },
+    {
+      title: `Target ICP Pain Agitation (${audience})`,
+      description: `Directly address key frustrations of ${audience} based on observed audience interest in @${cleanHandle}.`,
+      weightPercentage: 30,
+      recommendedFrequency: '2x / week'
+    },
+    {
+      title: `Deep-Dive Analysis & Proof`,
+      description: `Analytical, high-trust teardowns modeled after @${cleanHandle}'s top uploads.`,
+      weightPercentage: 20,
+      recommendedFrequency: '1-2x / week'
+    },
+    {
+      title: `Instant Visual & Tactical Demonstration`,
+      description: `High-retention macro visual hooks proving immediate value.`,
+      weightPercentage: 15,
+      recommendedFrequency: '1x / week'
+    }
+  ];
+
+  // Paid Ad Angles
+  const adAngles: AdVariantAngle[] = [
+    {
+      angleName: `The Agitation & Conversion Angle`,
+      hookCopy: topPost ? `Tired of generic takes on ${topPost.title.slice(0, 35)}? Here is what you need to know.` : `Tired of ${industry.toLowerCase()} options that fail ${audience}?`,
+      bodyVisualScript: `Fast zoom opening. Cutaway proving ${valueProp} with clean on-screen evidence.`,
+      primaryBenefit: valueProp,
+      callToAction: `Explore ${product} Now →`,
+      targetAudienceSegment: audience
+    },
+    {
+      angleName: `The Deep Transparency & Proof Angle`,
+      hookCopy: `We analyzed top performers in ${industry}. See why thousands are turning to ${brandName}.`,
+      bodyVisualScript: `Split-screen comparative graphic showing product specs, formulation, or analytical proof.`,
+      primaryBenefit: `Verified quality and transparent proof`,
+      callToAction: `Get Started Risk-Free →`,
+      targetAudienceSegment: `Analytical buyers & researchers`
+    },
+    {
+      angleName: `The Immediate Proof Angle`,
+      hookCopy: `Watch what happens when ${audience} switches to ${brandName} ${product}.`,
+      bodyVisualScript: `Dynamic compilation of rapid user feedback, high-contrast visual hooks, and tangible results.`,
+      primaryBenefit: `Instant visible value & performance`,
+      callToAction: `Claim Your Order Today →`,
+      targetAudienceSegment: `High-intent social proof seekers`
+    }
+  ];
 
   return {
     id: `bp_${Date.now()}`,
     generatedAt: new Date().toISOString(),
-    competitorHandle,
+    competitorHandle: cleanHandle,
     brandInput: {
       brandName,
       industry,
@@ -99,187 +330,16 @@ export function generateGrowthBlueprint(
       toneOfVoice: tone,
       primaryProduct: product
     },
-    executiveDiagnosis: {
-      competitorWinningEdge: `@${competitorHandle} achieves an average ${avgCompetitorER}% engagement rate by leaning into "${topCompetitorHook.slice(0, 60)}..." and ${topFormat.toLowerCase()} frameworks.`,
-      brandOpportunityGap: `While @${competitorHandle} captures broad awareness, ${brandName} can capture high-converting commercial intent by positioning ${product} as the definitive answer to ${audience}'s frustrations with ${valueProp}.`,
-      strategicVerdict: `Deploy a 7-day organic sprint utilizing ${brandName}'s unique tone ("${tone}") while mimicking the high-retention 400ms visual interrupts proven by @${competitorHandle}.`
-    },
-    contentPillars: [
-      {
-        title: `${product} Quality & Mechanism Breakdown`,
-        description: `Deconstruct why ${brandName}'s ${product} outperforms legacy ${industry.toLowerCase()} products. Highlight: ${valueProp}.`,
-        weightPercentage: 35,
-        recommendedFrequency: '3x / week'
-      },
-      {
-        title: `Target ICP Pain Agitation (${audience})`,
-        description: `Directly address the #1 mistake ${audience} makes before discovering ${brandName}.`,
-        weightPercentage: 30,
-        recommendedFrequency: '2x / week'
-      },
-      {
-        title: `Behind the Curtain / Radical Transparency`,
-        description: `Show the raw development, lab decisions, or engineering choices behind ${brandName}.`,
-        weightPercentage: 20,
-        recommendedFrequency: '1-2x / week'
-      },
-      {
-        title: `Instant Sensory Proof & Transformation`,
-        description: `High-definition macro visuals and immediate demonstration of ${product} delivering visible results.`,
-        weightPercentage: 15,
-        recommendedFrequency: '1x / week'
-      }
-    ],
-    originalHooks: [
-      {
-        id: 'hook_1',
-        title: `The ${industry} Myth Teardown`,
-        hookHeadline: `"Stop wasting your money on ${industry.toLowerCase()} solutions that ignore this one critical flaw."`,
-        visualCue: `Direct eye contact holding up ${product} with an on-screen red warning box highlighting common industry failures.`,
-        underlyingPsychology: `Pain-First Agitation & Relief: Immediately validates ${audience}'s past struggles.`,
-        scriptOutline: `1. Call out why standard options fail ${audience}.\n2. Explain the science/logic behind ${valueProp}.\n3. Reveal how ${product} was engineered to solve this.\n4. Call to action to compare formulas.`,
-        suggestedFormat: `Founder POV Reel (25-30s)`,
-        callToAction: `Comment "${brandName.toUpperCase()}" and we will DM you the complete ingredient comparison breakdown.`,
-        estimatedWinRate: `89% Historical Win Probability`,
-        inspiredByCompetitorPost: topCompetitorHook
-      },
-      {
-        id: 'hook_2',
-        title: `The Cost & Integrity Breakdown`,
-        hookHeadline: `"Here is why ${brandName} refuses to cut corners on ${product}, down to the exact dollar."`,
-        visualCue: `Opening a physical notebook or screen showing real production costs vs bloated retail markups.`,
-        underlyingPsychology: `Radical Transparency & High-Trust Conversion.`,
-        scriptOutline: `1. State the retail price of ${product} openly.\n2. Itemize where every single cent goes (premium sourcing, clean clinical testing).\n3. Contrast with cheap mass-market fillers.\n4. Close on why ${brandName} chooses quality over margins.`,
-        suggestedFormat: `Behind-the-Scenes Fast Vlog (35-45s)`,
-        callToAction: `Save this post before you buy your next ${industry.toLowerCase()} item.`,
-        estimatedWinRate: `94% Historical Win Probability`,
-        inspiredByCompetitorPost: secondCompetitorHook
-      },
-      {
-        id: 'hook_3',
-        title: `The 14-Day Side-by-Side Test`,
-        hookHeadline: `"What happens when ${audience} switches to ${brandName} for 14 straight days?"`,
-        visualCue: `Split screen with Day 1 vs Day 14 timeline slider showing real unedited progress.`,
-        underlyingPsychology: `Curiosity Gap & Proof-Driven Validation.`,
-        scriptOutline: `1. Present the 14-day challenge.\n2. Document the exact timeline of benefits from ${valueProp}.\n3. Reveal the tangible difference ${product} makes.\n4. Ask viewers to vote on the result.`,
-        suggestedFormat: `Split-Screen Case Study (25s)`,
-        callToAction: `Are you dealing with this issue? Drop your questions below.`,
-        estimatedWinRate: `82% Historical Win Probability`,
-        inspiredByCompetitorPost: thirdCompetitorHook
-      },
-      {
-        id: 'hook_4',
-        title: `The 3-Second Sensory Micro-Hook`,
-        hookHeadline: `"The one detail in ${product} that took the ${brandName} team 6 months to perfect."`,
-        visualCue: `Macro close-up with ultra-crisp audio of product texture, unboxing, or direct usage in first 200ms.`,
-        underlyingPsychology: `Sensory Dopamine & Quality Perception.`,
-        scriptOutline: `1. High-frequency audio trigger in first 200ms.\n2. Explain the ergonomic or formulation breakthrough.\n3. Show how it elevates the daily experience of ${audience}.`,
-        suggestedFormat: `Tactile Macro Reel (18-22s)`,
-        callToAction: `Tap the link in bio to try ${product} with our 30-day guarantee.`,
-        estimatedWinRate: `91% Historical Win Probability`,
-        inspiredByCompetitorPost: `Micro-Retention Pacing Rule`
-      },
-      {
-        id: 'hook_5',
-        title: `Confronting the Toughest Review`,
-        hookHeadline: `"Someone commented: 'Is ${brandName} actually worth it for ${audience}?' Let's be 100% honest."`,
-        visualCue: `Holding up a phone displaying a real skeptical customer comment on screen.`,
-        underlyingPsychology: `Authenticity & Objection Demystification.`,
-        scriptOutline: `1. Read the customer objection verbatim.\n2. Acknowledge who ${product} is NOT for.\n3. Detail who gets life-changing value from ${valueProp}.\n4. Offer an invitation for honest feedback.`,
-        suggestedFormat: `Unfiltered AMA Response (40-50s)`,
-        callToAction: `What tough question should the ${brandName} founder answer next?`,
-        estimatedWinRate: `86% Historical Win Probability`,
-        inspiredByCompetitorPost: `High-Trust Community Defense`
-      }
-    ],
-    sevenDayCalendar: [
-      {
-        day: 'Monday',
-        theme: `Authority & Pain Agitation: The ${industry} Myth`,
-        format: 'Founder Talking Head (28s)',
-        hookHeadline: `The #1 costly error ${audience} makes when choosing ${industry.toLowerCase()}`,
-        productionNotes: `Natural window lighting. Jump cut every 3 seconds. Bold yellow on-screen captions. Feature ${product} prominently.`,
-        targetMetric: 'Reach / Top of Funnel'
-      },
-      {
-        day: 'Tuesday',
-        theme: `Sensory Proof: ${product} In Action`,
-        format: 'Macro Audio & Texture Reel (18s)',
-        hookHeadline: `Listen to this before you use ${product}`,
-        productionNotes: `External microphone right next to product. Focus on tactile satisfaction and visual clarity in first 300ms.`,
-        targetMetric: 'Saves / High Intent'
-      },
-      {
-        day: 'Wednesday',
-        theme: `Radical Transparency: Why ${brandName} Exists`,
-        format: 'Behind the Scenes Story (42s)',
-        hookHeadline: `Why we rejected 5 manufacturers before launching ${product}`,
-        productionNotes: `Show real raw prototypes and testing notes to anchor authenticity and trust with ${audience}.`,
-        targetMetric: 'Saves / High Intent'
-      },
-      {
-        day: 'Thursday',
-        theme: `Side-by-Side Comparison: Standard vs ${brandName}`,
-        format: 'Split-Screen Case Study (25s)',
-        hookHeadline: `Standard ${industry} product vs. ${brandName} ${product}`,
-        productionNotes: `High contrast red/green overlays proving ${valueProp} objectively.`,
-        targetMetric: 'Conversions'
-      },
-      {
-        day: 'Friday',
-        theme: `Direct Objection Crusher / AMA`,
-        format: 'Founder Uncut Response (45s)',
-        hookHeadline: `Answering the most critical review of ${product} on our website`,
-        productionNotes: `Casual seated framing. Conversational tone in alignment with ${tone}. No background music.`,
-        targetMetric: 'Comments / Community'
-      },
-      {
-        day: 'Saturday',
-        theme: `Customer Transformation Case Study`,
-        format: 'Story-Driven Carousel / Reel (30s)',
-        hookHeadline: `What happened after 30 days of ${audience} using ${product}`,
-        productionNotes: `Fast paced with authentic customer quotes and measurable checkpoints.`,
-        targetMetric: 'Conversions'
-      },
-      {
-        day: 'Sunday',
-        theme: `Weekly Vision & Community Q&A`,
-        format: 'Reflection Carousel / Voiceover (20s)',
-        hookHeadline: `Why we built ${brandName} to challenge the status quo`,
-        productionNotes: `Inspiring weekend reflection reinforcing ${valueProp} and brand mission.`,
-        targetMetric: 'Reach / Top of Funnel'
-      }
-    ],
-    adAngles: [
-      {
-        angleName: `The Problem-Agitation Retargeting Angle`,
-        hookCopy: `Tired of standard ${industry.toLowerCase()} products that fail ${audience}? Here is why ${brandName} is different.`,
-        bodyVisualScript: `Fast zoom on founder holding ${product}. Cutaway demonstrating ${valueProp} solving the exact pain point with on-screen lab evidence.`,
-        primaryBenefit: valueProp,
-        callToAction: `Order ${product} with Risk-Free 30-Day Guarantee →`,
-        targetAudienceSegment: audience
-      },
-      {
-        angleName: `The Radical Transparency & Value Angle`,
-        hookCopy: `We compared the active formula in ${product} against the market leaders. See why thousands made the switch to ${brandName}.`,
-        bodyVisualScript: `Clean split-screen graphic displaying pure ingredient/feature ratios, transparent pricing, and clinical results.`,
-        primaryBenefit: `Unmatched quality without unnecessary markups`,
-        callToAction: `Claim Your First Order Trial →`,
-        targetAudienceSegment: `Skeptical researchers & value seekers`
-      },
-      {
-        angleName: `The Immediate Sensory Proof Angle`,
-        hookCopy: `The reviews are in. Watch what happens when ${audience} experiences ${brandName} for the first time.`,
-        bodyVisualScript: `Montage of genuine first impressions, tactile ASMR audio, and instant visible transformation using ${product}.`,
-        primaryBenefit: `Instant visible & tangible results`,
-        callToAction: `Shop the Best-Selling ${product} →`,
-        targetAudienceSegment: `Social proof seekers & impulse buyers`
-      }
-    ],
+    executiveDiagnosis,
+    contentPillars,
+    originalHooks,
+    sevenDayCalendar,
+    adAngles,
     guardrailsAndAntiPatterns: [
-      `NEVER run generic stock photos or uninspired discount ads—public data shows audience retention drops 78% on generic sales collateral.`,
-      `NEVER delay the primary visual motion or key hook past the 400ms threshold. Maintain 120-135 BPM video pacing.`,
-      `NEVER make claims without anchoring in verifiable proof, authentic customer feedback, or transparent breakdown of ${product}.`
+      `NEVER run static uninspired ads—observed data on @${cleanHandle} shows video retention relies heavily on dynamic 0-3s visual pattern interrupts.`,
+      `NEVER delay the primary visual motion or key hook headline past the 400ms threshold.`,
+      `NEVER make claims without anchoring in verifiable proof, authentic breakdown, or clear demonstration of ${product}.`
     ]
   };
 }
+

@@ -6,15 +6,8 @@ import { SwarmOrchestrator } from '@/lib/ai/agent-swarm';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { competitorUrl, competitorHandle, competitorPosts, brandInput } = body;
-
-    if (!brandInput || !brandInput.brandName) {
-      return NextResponse.json(
-        { success: false, error: 'Please provide your brand name and essential details.' },
-        { status: 400 }
-      );
-    }
-
+    const { competitorUrl, competitorHandle, competitorPosts, brandInput } = body || {};
+    const userBrandInput = brandInput || {};
     let posts = competitorPosts || [];
     let handle = competitorHandle || 'inspiration';
 
@@ -37,12 +30,12 @@ export async function POST(req: NextRequest) {
           topic: p.topic
         })),
         {
-          brandName: brandInput.brandName,
-          industry: brandInput.industry || 'Technology & D2C',
-          icp: brandInput.targetAudience || (brandInput as any).icp || 'Active consumers and decision makers',
-          valueProp: brandInput.valueProposition || (brandInput as any).valueProp || 'Delivering premium transformative value',
-          product: brandInput.primaryProduct || (brandInput as any).product || brandInput.brandName,
-          toneOfVoice: Array.isArray(brandInput.toneOfVoice) ? brandInput.toneOfVoice : [brandInput.toneOfVoice || 'authoritative']
+          brandName: userBrandInput.brandName || '',
+          industry: userBrandInput.industry || 'Technology & D2C',
+          icp: userBrandInput.targetAudience || (userBrandInput as any).icp || 'Active consumers and decision makers',
+          valueProp: userBrandInput.valueProposition || (userBrandInput as any).valueProp || 'Delivering premium transformative value',
+          product: userBrandInput.primaryProduct || (userBrandInput as any).product || userBrandInput.brandName || 'Flagship Product',
+          toneOfVoice: Array.isArray(userBrandInput.toneOfVoice) ? userBrandInput.toneOfVoice : [userBrandInput.toneOfVoice || 'authoritative']
         }
       );
 
@@ -58,7 +51,7 @@ export async function POST(req: NextRequest) {
       console.warn('Swarm orchestrator error, using deterministic blueprint:', swarmErr);
     }
 
-    const blueprint = generateGrowthBlueprint(posts, brandInput as UserBrandInput, handle);
+    const blueprint = generateGrowthBlueprint(posts, userBrandInput as UserBrandInput, handle);
 
     return NextResponse.json({
       success: true,

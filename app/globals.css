@@ -280,3 +280,23 @@ code, pre, .font-mono {
 .input-velvet::placeholder {
   color: var(--text-vanilla-subtle);
 }
+
+/* Infinite Scrolling Text Marquee */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

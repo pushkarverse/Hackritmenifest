@@ -549,7 +549,7 @@ export class LiveSocialAdapter implements SocialPlatformAdapter {
 
   async getProfile(url: string): Promise<PlatformProfileInfo> {
     const handle = await this.resolveAccountHandle(url);
-    const isYT = url.includes('youtube.com') || url.includes('youtu.be');
+    const isYT = this.platform === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be') || url.includes('youtube');
     const isWeb = this.platform === 'web' || (!url.includes('instagram.com') && !url.includes('tiktok.com') && !isYT && /^https?:\/\//i.test(url.trim()));
 
     // 0. If Web article / blog / publication
@@ -745,7 +745,7 @@ export class LiveSocialAdapter implements SocialPlatformAdapter {
     const handle = await this.resolveAccountHandle(url);
     const profile = await this.getProfile(url);
     const posts: ExtractedPost[] = [];
-    const isYT = url.includes('youtube.com') || url.includes('youtu.be');
+    const isYT = this.platform === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be') || url.includes('youtube');
     const isWeb = this.platform === 'web' || (!url.includes('instagram.com') && !url.includes('tiktok.com') && !isYT && /^https?:\/\//i.test(url.trim()));
 
     // 0. If Web article / editorial page

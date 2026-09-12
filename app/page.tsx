@@ -329,13 +329,13 @@ export default function LaunchpadPage() {
             <div>
               <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 uppercase tracking-widest mb-1">
                 <Atom className="w-3.5 h-3.5" />
-                <span>Motion-Activated Capabilities</span>
+                <span>Live System Telemetry</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-display font-bold text-white">
-                Interactive System Deconstruction
+                Core Operating Engine Deconstruction
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mt-1">
-                Hover over the architecture layers to inspect how ContentOS connects observed public telemetry into generative creative production.
+                Inspect how ContentOS connects real-time observed public telemetry into generative creative production.
               </p>
             </div>
 

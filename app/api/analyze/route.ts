@@ -4,7 +4,7 @@ import { SocialAdapterFactory } from '@/lib/ingestion/adapters';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { url } = body;
+    const { url, platform: platformHint } = body;
 
     if (!url || typeof url !== 'string' || url.trim() === '') {
       return NextResponse.json(
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { adapter, platform } = SocialAdapterFactory.getAdapterForUrl(url);
+    const { adapter, platform } = SocialAdapterFactory.getAdapterForUrl(url, platformHint);
 
     if (!adapter.validateUrl(url)) {
       return NextResponse.json(
