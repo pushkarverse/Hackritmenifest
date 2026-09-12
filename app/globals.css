@@ -6,6 +6,9 @@
 
 
 :root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
   /* Vanilla White & Black Velvet Color Palette */
   --bg-velvet-base: #09090b;
   --bg-velvet-layer1: #0d0d11;

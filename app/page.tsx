@@ -24,7 +24,7 @@ import {
   BrainCircuit
 } from 'lucide-react';
 import { AnalysisTransition } from '@/components/AnalysisTransition';
-import { ImageStreamHero } from '@/components/ui/image-stream-hero';
+import ScrollMorphHero from '@/components/ui/scroll-morph-hero';
 import InteractiveListPreview from '@/components/ui/interactive-list-preview';
 
 const HERO_STREAM_IMAGES = [
@@ -273,53 +273,12 @@ export default function LaunchpadPage() {
         </div>
       </header>
 
-      {/* HERO SECTION WITH IMAGE STREAM CORRIDOR */}
+      {/* HERO SECTION WITH COLOR-MATCHED SCROLL-MORPH ANIMATION */}
       <section className="relative w-full border-b border-white/10 overflow-hidden">
-        <ImageStreamHero
-          images={HERO_STREAM_IMAGES}
-          cards={9}
-          speed={18}
-          axis={52}
-          className="h-[520px] sm:h-[580px] w-full bg-[#09090b]"
-        >
-          {/* Hero Overlay Content Floating in Front */}
-          <div className="relative z-20 flex h-full flex-col items-center justify-between py-10 sm:py-14 px-6 text-center max-w-5xl mx-auto">
-            {/* System Status Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/70 border border-white/15 backdrop-blur-md text-xs font-mono text-zinc-300 shadow-xl">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span>CONTENTOS — PROVENANCE-AWARE SOCIAL REVERSE-ENGINEERING</span>
-            </div>
-
-            {/* Core Value Proposition */}
-            <div className="space-y-4 max-w-3xl">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight text-white leading-[1.1] drop-shadow-2xl">
-                Turn Public Competitor Content DNA into an{" "}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-white to-cyan-300">
-                  Unfair Growth Engine
-                </span>
-              </h1>
-              <p className="text-sm sm:text-base text-zinc-300/90 max-w-2xl mx-auto font-normal leading-relaxed bg-black/40 backdrop-blur-sm p-3 rounded-xl border border-white/5">
-                We deconstruct winning 3-second hooks, audio BPM pacing, psychological triggers, and engagement velocity—synthesizing high-retention organic and paid ad playbooks.
-              </p>
-            </div>
-
-            {/* Quick Action Navigation */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <button
-                onClick={() => scrollToSection(analyzerRef)}
-                className="btn-vanilla !py-2.5 !px-5 text-xs font-semibold shadow-xl hover:scale-105 transition-all"
-              >
-                Analyze Public URL <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </button>
-              <button
-                onClick={() => scrollToSection(previewRef)}
-                className="btn-ghost !py-2.5 !px-5 text-xs font-mono bg-black/60 backdrop-blur-md hover:bg-white/10"
-              >
-                Interactive System Preview ↓
-              </button>
-            </div>
-          </div>
-        </ImageStreamHero>
+        <ScrollMorphHero
+          onExploreClick={() => scrollToSection(analyzerRef)}
+          className="w-full"
+        />
       </section>
 
       {/* INTERACTIVE COMPONENT PREVIEW SHOWCASE */}
