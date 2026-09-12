@@ -69,68 +69,61 @@ function formatCount(num: number | undefined): string {
   return num.toLocaleString();
 }
 
-function inferNicheFromText(text: string, handle: string) {
-  const lower = (text + ' ' + handle).toLowerCase();
+function extractBrandProfileFromData(posts: ExtractedPost[], handle: string) {
+  const validPosts = (posts || []).filter(p => p && (p.title || p.caption));
+  const topPost = validPosts[0];
+
+  // Derive account name from post data or handle
+  const cleanHandle = (handle && handle !== 'inspiration') ? handle.replace(/^@/, '') : '';
+  const rawAccountName = topPost?.accountName || cleanHandle || 'Analyzed Channel';
+  const brandName = rawAccountName.charAt(0).toUpperCase() + rawAccountName.slice(1);
+
+  // Extract distinct topics or prominent keywords from real titles
+  const observedTopics = new Set<string>();
+  validPosts.forEach(p => {
+    if (p.topic && p.topic.trim()) observedTopics.add(p.topic.trim());
+  });
+
+  if (observedTopics.size === 0 && validPosts.length > 0) {
+    const stopWords = new Set(['the', 'and', 'for', 'with', 'this', 'that', 'you', 'from', 'how', 'why', 'what', 'are', 'your', 'about', 'more', 'have', 'will', 'been', 'post', 'video', 'real', 'full']);
+    const wordCounts: Record<string, number> = {};
+    validPosts.forEach(p => {
+      const text = `${p.title} ${p.caption || ''}`.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+      text.split(/\s+/).forEach(w => {
+        if (w.length > 3 && !stopWords.has(w)) {
+          wordCounts[w] = (wordCounts[w] || 0) + 1;
+        }
+      });
+    });
+    const topKeywords = Object.entries(wordCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(e => e[0].charAt(0).toUpperCase() + e[0].slice(1));
+    topKeywords.slice(0, 3).forEach(k => observedTopics.add(k));
+  }
+
+  const topicArray = Array.from(observedTopics);
+  const primaryCategory = topicArray.length > 0 ? topicArray.slice(0, 2).join(' & ') : 'Digital Content & Media';
+
+  const industry = topicArray.length > 0 ? `${primaryCategory} Sector` : 'Digital Media & Content';
   
-  if (lower.includes('comic') || lower.includes('marvel') || lower.includes('dc') || lower.includes('spider') || lower.includes('movie') || lower.includes('batman') || lower.includes('avengers') || lower.includes('trailer') || lower.includes('anime') || lower.includes('film') || lower.includes('cinema')) {
-    return {
-      industry: 'Pop Culture, Cinema & Entertainment Lore',
-      audience: 'Entertainment enthusiasts, movie buffs & pop culture fans',
-      valueProp: 'Unfiltered deep-dive cinematic breakdowns & hidden lore revelations',
-      product: 'Flagship Breakdown Series & Exclusive Member Lore Hub'
-    };
-  }
+  const audience = topPost?.title
+    ? `Viewers interested in ${primaryCategory.toLowerCase()} and topics like "${topPost.title.slice(0, 40)}"`
+    : `Engaged followers & target audience interested in ${primaryCategory}`;
 
-  if (lower.includes('code') || lower.includes('tech') || lower.includes('ai') || lower.includes('software') || lower.includes('dev') || lower.includes('python') || lower.includes('react') || lower.includes('gadget') || lower.includes('phone') || lower.includes('apple')) {
-    return {
-      industry: 'Software Engineering, AI & Tech Systems',
-      audience: 'Developers, tech founders & engineering leaders',
-      valueProp: 'Production-grade architectural breakdowns & AI workflow blueprints',
-      product: 'Engineering Masterclass & Developer OS Tools'
-    };
-  }
+  const valueProp = topPost?.contentSignals?.keyTakeaway || (topPost?.title
+    ? `High-retention breakdowns & actionable insights on ${topPost.title.slice(0, 45)}`
+    : `High-impact visual storytelling & authority positioning`);
 
-  if (lower.includes('fit') || lower.includes('gym') || lower.includes('workout') || lower.includes('muscle') || lower.includes('diet') || lower.includes('protein') || lower.includes('health')) {
-    return {
-      industry: 'Fitness, High Performance & Nutrition',
-      audience: 'Fitness enthusiasts & athletes striving for optimal human performance',
-      valueProp: 'Science-backed workout protocols & evidence-based physical optimization',
-      product: 'Peak Performance Training Program & Custom Meal Protocols'
-    };
-  }
-
-  if (lower.includes('game') || lower.includes('gaming') || lower.includes('playstation') || lower.includes('xbox') || lower.includes('gta') || lower.includes('stream') || lower.includes('esports')) {
-    return {
-      industry: 'Gaming, Esports & Interactive Media',
-      audience: 'Gamers, live stream viewers & esports community',
-      valueProp: 'High-energy gameplay breakdowns & meta strategy deep dives',
-      product: 'VIP Gaming Guild & Exclusive Strategy Guides'
-    };
-  }
-
-  if (lower.includes('money') || lower.includes('crypto') || lower.includes('finance') || lower.includes('stock') || lower.includes('invest') || lower.includes('business') || lower.includes('startup') || lower.includes('founder')) {
-    return {
-      industry: 'Finance, Business & Wealth Strategy',
-      audience: 'Investors, entrepreneurs & ambitious professionals',
-      valueProp: 'Actionable financial intelligence & market growth breakdowns',
-      product: 'Wealth Mastermind & Business Growth Frameworks'
-    };
-  }
-
-  if (lower.includes('skin') || lower.includes('beauty') || lower.includes('makeup') || lower.includes('cosmetics')) {
-    return {
-      industry: 'D2C Skincare & Beauty',
-      audience: 'Skincare enthusiasts seeking clinical barrier repair & glowing skin',
-      valueProp: 'Bio-compatible formulations backed by clinical research',
-      product: 'Flagship Barrier Repair Serum'
-    };
-  }
+  const product = topPost?.title
+    ? `Flagship Breakdown Series around ${topicArray[0] || 'Core Content'}`
+    : `Flagship Content & Growth Ecosystem`;
 
   return {
-    industry: 'Digital Content & Creator Growth Engine',
-    audience: 'Engaged subscribers, followers & niche target audience',
-    valueProp: 'High-retention visual storytelling & authority positioning',
-    product: 'Flagship Content Series & Creator Offer Ecosystem'
+    brandName,
+    industry,
+    targetAudience: audience,
+    valueProposition: valueProp,
+    primaryProduct: product
   };
 }
 
@@ -146,25 +139,21 @@ export function generateGrowthBlueprint(
   const secondPost = sortedByViews[1] || validPosts[1] || topPost;
   const thirdPost = sortedByViews[2] || validPosts[2] || topPost;
 
-  // Infer domain/niche from observed post titles & handle
-  const allTitlesText = validPosts.map(p => p.title || p.caption || '').join(' ');
-  const detectedNiche = inferNicheFromText(allTitlesText, competitorHandle);
+  // Dynamically extract brand identity directly from fetched post data
+  const extractedProfile = extractBrandProfileFromData(validPosts, competitorHandle);
 
-  // Determine clean handle and brand identity
   const cleanHandle = competitorHandle.replace(/^@/, '');
-  const formattedHandleName = cleanHandle ? cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1) : 'Creator';
-  
   const isDefaultBrand = !brand?.brandName || brand.brandName === 'Aura Skincare' || brand.brandName === 'Your Brand Name' || brand.brandName.trim() === '';
 
   const brandName = isDefaultBrand
-    ? formattedHandleName
+    ? extractedProfile.brandName
     : brand.brandName.trim();
 
-  const industry = isDefaultBrand || !brand?.industry?.trim() ? detectedNiche.industry : brand.industry.trim();
-  const audience = isDefaultBrand || !brand?.targetAudience?.trim() ? detectedNiche.audience : brand.targetAudience.trim();
-  const valueProp = isDefaultBrand || !brand?.valueProposition?.trim() ? detectedNiche.valueProp : brand.valueProposition.trim();
-  const tone = (brand?.toneOfVoice || 'Authoritative, fast-paced, and analytical').trim();
-  const product = isDefaultBrand || !brand?.primaryProduct?.trim() ? detectedNiche.product : brand.primaryProduct.trim();
+  const industry = isDefaultBrand || !brand?.industry?.trim() ? extractedProfile.industry : brand.industry.trim();
+  const audience = isDefaultBrand || !brand?.targetAudience?.trim() ? extractedProfile.targetAudience : brand.targetAudience.trim();
+  const valueProp = isDefaultBrand || !brand?.valueProposition?.trim() ? extractedProfile.valueProposition : brand.valueProposition.trim();
+  const tone = (brand?.toneOfVoice || (validPosts.find(p => p.tone)?.tone) || 'Authoritative, fast-paced, and analytical').trim();
+  const product = isDefaultBrand || !brand?.primaryProduct?.trim() ? extractedProfile.primaryProduct : brand.primaryProduct.trim();
 
   // Compute total observed views and average ER
   const totalViews = validPosts.reduce((acc, p) => acc + (p.metrics?.views?.value || 0), 0);

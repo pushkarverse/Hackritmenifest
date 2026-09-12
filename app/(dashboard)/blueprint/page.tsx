@@ -28,8 +28,8 @@ function BlueprintContent() {
   const router = useRouter();
   const rawUrl = searchParams.get('competitorUrl');
   const rawHandle = searchParams.get('handle');
-  const competitorUrl = rawUrl || 'https://www.youtube.com/@comicverseog';
-  const competitorHandle = rawHandle || (rawUrl ? rawUrl.split('/').pop()?.replace('@', '') : 'comicverseog') || 'creator';
+  const competitorUrl = rawUrl || '';
+  const competitorHandle = rawHandle || (rawUrl ? rawUrl.split('/').pop()?.replace('@', '') : '') || '';
   const limitParam = parseInt(searchParams.get('limit') || '12', 10) || 12;
 
   // Brand Inputs State
@@ -76,8 +76,9 @@ function BlueprintContent() {
   };
 
   useEffect(() => {
-    // Generate initial blueprint
-    generateBlueprint();
+    if (competitorUrl) {
+      generateBlueprint();
+    }
   }, [competitorUrl, competitorHandle]);
 
   const handleCopy = (text: string, id: string) => {
