@@ -32,12 +32,12 @@ function BlueprintContent() {
 
   // Brand Inputs State
   const [brandInput, setBrandInput] = useState<UserBrandInput>({
-    brandName: 'Aura Skincare',
-    industry: 'Clean D2C Beauty',
-    targetAudience: 'Skincare enthusiasts seeking clinical barrier repair without harsh chemicals',
-    valueProposition: '100% bio-compatible hydration formulated by dermatologists',
-    toneOfVoice: 'Science-backed, transparent, warm, and authoritative',
-    primaryProduct: 'Ceramide Barrier Recovery Serum'
+    brandName: '',
+    industry: '',
+    targetAudience: '',
+    valueProposition: '',
+    toneOfVoice: '',
+    primaryProduct: ''
   });
 
   const [blueprint, setBlueprint] = useState<GrowthBlueprint | null>(null);
@@ -128,8 +128,9 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.brandName}
+              placeholder={isGenerating ? "Synthesizing from creator DNA..." : "e.g. Creator / Startup Brand Name"}
               onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, brandName: e.target.value }); }}
-              className="input-velvet !py-2 !text-xs"
+              className="input-velvet !py-2 !text-xs placeholder:text-zinc-600"
             />
           </div>
 
@@ -138,8 +139,9 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.industry}
+              placeholder={isGenerating ? "Detecting content niche..." : "e.g. Category or Industry"}
               onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, industry: e.target.value }); }}
-              className="input-velvet !py-2 !text-xs"
+              className="input-velvet !py-2 !text-xs placeholder:text-zinc-600"
             />
           </div>
 
@@ -148,8 +150,9 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.primaryProduct}
+              placeholder={isGenerating ? "Analyzing flagship format..." : "e.g. Primary Product or Series"}
               onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, primaryProduct: e.target.value }); }}
-              className="input-velvet !py-2 !text-xs"
+              className="input-velvet !py-2 !text-xs placeholder:text-zinc-600"
             />
           </div>
 
@@ -158,8 +161,9 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.targetAudience}
+              placeholder={isGenerating ? "Profiling target viewers..." : "e.g. Ideal Customer Profile"}
               onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, targetAudience: e.target.value }); }}
-              className="input-velvet !py-2 !text-xs"
+              className="input-velvet !py-2 !text-xs placeholder:text-zinc-600"
             />
           </div>
 
@@ -168,8 +172,9 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.valueProposition}
+              placeholder={isGenerating ? "Mapping value triggers..." : "e.g. Core Value Proposition"}
               onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, valueProposition: e.target.value }); }}
-              className="input-velvet !py-2 !text-xs"
+              className="input-velvet !py-2 !text-xs placeholder:text-zinc-600"
             />
           </div>
 
@@ -178,8 +183,9 @@ function BlueprintContent() {
             <input
               type="text"
               value={brandInput.toneOfVoice}
+              placeholder={isGenerating ? "Analyzing voice tone..." : "e.g. Authoritative, Fast-Paced"}
               onChange={(e) => { setIsUserEdited(true); setBrandInput({ ...brandInput, toneOfVoice: e.target.value }); }}
-              className="input-velvet !py-2 !text-xs"
+              className="input-velvet !py-2 !text-xs placeholder:text-zinc-600"
             />
           </div>
         </div>

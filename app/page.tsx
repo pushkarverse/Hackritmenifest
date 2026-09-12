@@ -24,67 +24,7 @@ import {
   BrainCircuit
 } from 'lucide-react';
 import { AnalysisTransition } from '@/components/AnalysisTransition';
-import ScrollMorphHero from '@/components/ui/scroll-morph-hero';
 import InteractiveListPreview from '@/components/ui/interactive-list-preview';
-
-const HERO_STREAM_IMAGES = [
-  {
-    src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
-    alt: "Glow Recipe Glass Skin Hook",
-    creator: "@glowrecipe",
-    hook: "Stop washing your face with hot water if you want glass skin.",
-    multiplier: "+3.1× MEDIAN",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80",
-    alt: "Gymshark Recovery Protocol",
-    creator: "@gymshark",
-    hook: "The 5-minute cooldown protocol that cuts muscle soreness in half.",
-    multiplier: "+2.8× VIRAL",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80",
-    alt: "Notion Startup Workspace",
-    creator: "@notionhq",
-    hook: "How I organized my entire startup in 3 dashboard views.",
-    multiplier: "+4.2× VIRAL",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
-    alt: "Zomato Viral Street Food Reel",
-    creator: "@zomato",
-    hook: "Kya aapne ye secret menu item kabhi try kiya hai?",
-    multiplier: "+3.5× VIRAL",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80",
-    alt: "Zerodha Wealth Compounding",
-    creator: "@zerodha",
-    hook: "The compounding math they never teach you in business school.",
-    multiplier: "+2.9× RETENTION",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=800&auto=format&fit=crop&q=80",
-    alt: "Cult.fit Mobility Drill",
-    creator: "@cultfit",
-    hook: "Fix your squat depth with this 10-second hip mobility drill.",
-    multiplier: "+2.5× VIRAL",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&auto=format&fit=crop&q=80",
-    alt: "Minimalist Skincare Barrier Hook",
-    creator: "@bemine",
-    hook: "Why 10% Niacinamide might actually be irritating your skin barrier.",
-    multiplier: "+2.7× MEDIAN",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
-    alt: "Figma Shortcuts Reel",
-    creator: "@figma",
-    hook: "5 auto-layout shortcuts that will save you 2 hours every sprint.",
-    multiplier: "+3.0× VIRAL",
-  },
-];
 
 export default function LaunchpadPage() {
   const router = useRouter();
@@ -273,12 +213,44 @@ export default function LaunchpadPage() {
         </div>
       </header>
 
-      {/* HERO SECTION WITH COLOR-MATCHED SCROLL-MORPH ANIMATION */}
-      <section className="relative w-full border-b border-white/10 overflow-hidden">
-        <ScrollMorphHero
-          onExploreClick={() => scrollToSection(analyzerRef)}
-          className="w-full"
-        />
+      {/* CLEAN & PROFESSIONAL HERO SECTION */}
+      <section className="relative w-full border-b border-white/10 overflow-hidden py-16 sm:py-24 px-6 bg-gradient-to-b from-[#09090b] via-[#0d0d11] to-[#09090b]">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          {/* Status Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+            <span>CONTENTOS v2.4 — REVERSE-ENGINEER COMPETITOR CONTENT DNA</span>
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-4xl sm:text-6xl font-display font-extrabold tracking-tight text-white leading-[1.15]">
+            Turn Public Social Content into an{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-white to-cyan-300">
+              Unfair Growth Engine
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+            Deconstruct 3-second hooks, audio BPM pacing, psychological triggers, and real engagement velocity—synthesizing high-retention organic and paid playbooks.
+          </p>
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <button
+              onClick={() => scrollToSection(analyzerRef)}
+              className="btn-vanilla !py-3 !px-6 text-sm font-semibold shadow-xl hover:scale-105 transition-all"
+            >
+              Analyze Public URL <ArrowRight className="w-4 h-4 ml-1" />
+            </button>
+            <button
+              onClick={() => scrollToSection(previewRef)}
+              className="btn-ghost !py-3 !px-6 text-sm font-mono bg-white/5 hover:bg-white/10"
+            >
+              Explore Core Modules ↓
+            </button>
+          </div>
+        </div>
       </section>
 
       {/* INTERACTIVE COMPONENT PREVIEW SHOWCASE */}
